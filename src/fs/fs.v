@@ -6,7 +6,7 @@ import store
 
 // install into staging first, then commit
 pub fn install(info pkg.PkgInfo, db &store.DB, staging string) ! {
-	target_root := '/'
+	target_root := system_root()
 
 	for file in info.files {
 		src := os.join_path(info.root, file)
@@ -45,4 +45,11 @@ pub fn check_deps(deps []string) ! {
 			return error('missing dependency: ${d}')
 		}
 	}
+}
+
+pub fn system_root() string {
+  $if windows {
+    return 'C:\\'
+  }
+  return '/'
 }
