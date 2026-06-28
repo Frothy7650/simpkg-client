@@ -153,6 +153,14 @@ pub fn (db &DB) get_remote(name string) !JsonPackage {
 	return package
 }
 
+pub fn (db &DB) list_local() ![]Package {
+  packages := sql db.local {
+    select from Package
+  }!
+
+  return packages
+}
+
 pub fn (db &DB) delete_local(name string) ! {
 	sql db.local {
 		delete from Package where name == name
