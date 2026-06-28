@@ -3,6 +3,13 @@ module main
 import os
 import store
 
+fn system_root() string {
+  $if windows {
+    return 'C:\\'
+  }
+  return '/'
+}
+
 fn cmd_remove(name string) {
 	mut db := store.open() or {
 		eprintln(err.msg())
@@ -16,7 +23,7 @@ fn cmd_remove(name string) {
 
 	for f in info.files {
 		println('removing ${f}')
-		os.rm('/' + f) or { eprintln('failed: ${f}') }
+		os.rm(os.join_path(system_root(), f)) or { eprintln('failed: ${f}') }
 	}
 
 	db.delete_local(name) or { eprintln(err.msg()) }

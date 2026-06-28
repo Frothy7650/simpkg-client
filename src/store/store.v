@@ -100,7 +100,7 @@ pub fn (mut db DB) register(info pkg.PkgInfo) ! {
 	for f in info.files {
 		file := File{
 			name: info.name
-			path: '/' + f
+			path: f
 		}
 		sql db.local {
 			insert file into File
