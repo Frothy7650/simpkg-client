@@ -16,7 +16,7 @@ fn cmd_search(name string) ! {
 		score := strings.levenshtein_distance(package.name.to_lower(), name.to_lower())
 		scored << Scored{
 			package: package
-			score: score
+			score:   score
 		}
 	}
 
@@ -37,6 +37,6 @@ fn cmd_search(name string) ! {
 }
 
 struct Scored {
-  package store.JsonPackage
-  score   int
+	package store.JsonPackage
+	score   int
 }

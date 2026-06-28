@@ -10,7 +10,11 @@ import os
 pub const db_path = os.join_path(store_dir(), 'local.db')
 pub const remote_path = os.join_path(store_dir(), 'remote.json')
 
-pub const remote_url = $if windows { 'https://simpkg.frothy7650.org/api/windows' } $else $if linux { 'https://simpkg.frothy7650.org/api/linux' }
+pub const remote_url = $if windows {
+	'https://simpkg.frothy7650.org/api/windows'
+} $else $if linux {
+	'https://simpkg.frothy7650.org/api/linux'
+}
 
 fn store_dir() string {
 	$if windows {
@@ -27,12 +31,12 @@ pub mut:
 
 pub struct Package {
 pub mut:
-	name    string @[primary; unique]
-	version string
-	deps    string
-  preremoves  string
-  postremoves string
-	time    time.Time
+	name        string @[primary; unique]
+	version     string
+	deps        string
+	preremoves  string
+	postremoves string
+	time        time.Time
 }
 
 pub struct File {
@@ -82,12 +86,12 @@ pub fn open() !DB {
 
 pub fn (mut db DB) register(info pkg.PkgInfo) ! {
 	p := Package{
-		name:    info.name
-		version: info.version
-		deps:    json.encode(info.deps)
-    preremoves: json.encode(info.preremoves)
-    postremoves: json.encode(info.postremoves)
-		time:    time.now()
+		name:        info.name
+		version:     info.version
+		deps:        json.encode(info.deps)
+		preremoves:  json.encode(info.preremoves)
+		postremoves: json.encode(info.postremoves)
+		time:        time.now()
 	}
 
 	sql db.local {
@@ -122,11 +126,11 @@ pub fn (db &DB) get_local(name string) !pkg.PkgInfo {
 	}
 
 	mut info := pkg.PkgInfo{
-		name:    rows[0].name
-		version: rows[0].version
-		deps:    json.decode([]string, rows[0].deps) or { []string{} }
-    preremoves: json.decode([]string, rows[0].preremoves) or { []string{} }
-    postremoves: json.decode([]string, rows[0].postremoves) or { []string{} }
+		name:        rows[0].name
+		version:     rows[0].version
+		deps:        json.decode([]string, rows[0].deps) or { []string{} }
+		preremoves:  json.decode([]string, rows[0].preremoves) or { []string{} }
+		postremoves: json.decode([]string, rows[0].postremoves) or { []string{} }
 	}
 
 	files := sql db.local {
@@ -160,11 +164,11 @@ pub fn (db &DB) get_remote(name string) !JsonPackage {
 }
 
 pub fn (db &DB) list_local() ![]Package {
-  packages := sql db.local {
-    select from Package
-  }!
+	packages := sql db.local {
+		select from Package
+	}!
 
-  return packages
+	return packages
 }
 
 pub fn (db &DB) delete_local(name string) ! {
@@ -193,8 +197,8 @@ pub fn (db &DB) owner(path string) !string {
 }
 
 pub fn (db &DB) update_remote() ! {
-  println('fetching ${remote_url}')
+	println('fetching ${remote_url}')
 	remote := http.get(remote_url)!.body
 	os.write_file(remote_path, remote)!
-  println('done')
+	println('done')
 }

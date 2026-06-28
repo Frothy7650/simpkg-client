@@ -11,16 +11,16 @@ pub enum PkgType {
 
 pub struct PkgInfo {
 pub mut:
-	name    string
-	version string
-	type_   PkgType
-	deps    []string
-	files   []string
-  preinstalls  []string
-  postinstalls []string
-  preremoves   []string
-  postremoves  []string
-	root    string
+	name         string
+	version      string
+	type_        PkgType
+	deps         []string
+	files        []string
+	preinstalls  []string
+	postinstalls []string
+	preremoves   []string
+	postremoves  []string
+	root         string
 }
 
 pub fn open(path string, out_dir string) !string {
@@ -86,18 +86,18 @@ pub fn parse(root string) !PkgInfo {
 			'files' {
 				pkg.files << val
 			}
-      'preinstall' {
-        pkg.preinstalls << val
-      }
-      'postinstall' {
-        pkg.postinstalls << val
-      }
-      'preremove' {
-        pkg.preremoves << val
-      }
-      'postremove' {
-        pkg.postremoves << val
-      }
+			'preinstall' {
+				pkg.preinstalls << val
+			}
+			'postinstall' {
+				pkg.postinstalls << val
+			}
+			'preremove' {
+				pkg.preremoves << val
+			}
+			'postremove' {
+				pkg.postremoves << val
+			}
 			else {
 				return error('unknown key: ${key}')
 			}

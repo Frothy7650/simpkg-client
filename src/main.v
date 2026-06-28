@@ -16,20 +16,20 @@ fn main() {
 	cmd := os.args[1]
 
 	match cmd {
-    'update' {
-      cmd_update() or { eprintln(err.msg()) }
-      return
-    }
-    'list' {
-      cmd_list() or { eprintln(err.msg()) }
-      return
-    }
-    'clear-cache' {
-      cmd_clear_cache() or { eprintln(err.msg()) }
-      return
-    }
-    else {}
-  }
+		'update' {
+			cmd_update() or { eprintln(err.msg()) }
+			return
+		}
+		'list' {
+			cmd_list() or { eprintln(err.msg()) }
+			return
+		}
+		'clear-cache' {
+			cmd_clear_cache() or { eprintln(err.msg()) }
+			return
+		}
+		else {}
+	}
 
 	if os.args.len < 3 {
 		print_usage()
@@ -43,7 +43,7 @@ fn main() {
 		'remove' { cmd_remove(val) or { eprintln(err.msg()) } }
 		'query' { cmd_query(val) or { eprintln(err.msg()) } }
 		'owns' { cmd_owns(val) or { eprintln(err.msg()) } }
-    'search' { cmd_search(val) or { eprintln(err.msg()) } }
+		'search' { cmd_search(val) or { eprintln(err.msg()) } }
 		else { eprintln('unknown command') }
 	}
 }

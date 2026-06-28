@@ -32,15 +32,15 @@ pub fn install(info pkg.PkgInfo, db &store.DB, staging string) ! {
 	}
 
 	for file in info.files {
-    src := os.join_path(staging, file)
-    dst := os.join_path(target_root, file)
+		src := os.join_path(staging, file)
+		dst := os.join_path(target_root, file)
 
-    dir := os.dir(dst)
+		dir := os.dir(dst)
 		if !os.exists(dir) {
 			os.mkdir_all(dir)!
 		}
 
-    os.cp(src, dst)!
+		os.cp(src, dst)!
 	}
 }
 
@@ -53,8 +53,8 @@ pub fn check_deps(deps []string) ! {
 }
 
 pub fn system_root() string {
-  $if windows {
-    return 'C:\\'
-  }
-  return '/'
+	$if windows {
+		return 'C:\\'
+	}
+	return '/'
 }
