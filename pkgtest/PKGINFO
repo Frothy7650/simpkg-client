@@ -1,6 +1,0 @@
-name=pkgtest
-version=0.0.0
-type=binary
-depends=gcc
-
-files=usr/bin/pkgtest
