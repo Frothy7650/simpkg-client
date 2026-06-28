@@ -14,11 +14,6 @@ context.task(
 )
 
 context.task(
-	name:    'build-windows'
-	run:     |self| system('v -os windows src/. -o ${app_name}')
-)
-
-context.task(
 	name:    'build-prod'
 	run:     |self| system('v -cc clang -prod src/. -o ${app_name}')
 )
@@ -29,13 +24,8 @@ context.task(
 )
 
 context.task(
-  name: 'pkgtest'
-  run:  |self| system('cd pkgtest/ && zip -r ../pkgtest.simpkg .')
-)
-
-context.task(
   name: 'install'
   run:  |self| system('sudo cp -r ${app_name} /usr/bin/simpkg')
-  )
+)
 
 context.run()
