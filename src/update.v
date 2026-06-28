@@ -7,4 +7,3 @@ fn cmd_update() ! {
 
 	db.update_remote()!
 }
-

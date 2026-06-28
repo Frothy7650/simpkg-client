@@ -19,8 +19,8 @@ fn store_dir() string {
 
 pub struct DB {
 pub mut:
-	local   sqlite.DB
-  remote  []JsonPackage
+	local  sqlite.DB
+	remote []JsonPackage
 }
 
 pub struct Package {
@@ -39,9 +39,9 @@ pub mut:
 
 pub struct JsonPackage {
 pub mut:
-  name    string
-  version string
-  source  string
+	name    string
+	version string
+	source  string
 }
 
 pub fn open() !DB {
@@ -49,14 +49,14 @@ pub fn open() !DB {
 		os.mkdir_all(store_dir())!
 	}
 
-  if !os.exists(db_path) {
-    os.create(db_path)!
-  }
+	if !os.exists(db_path) {
+		os.create(db_path)!
+	}
 
-  if !os.exists(remote_path) {
-    os.create(remote_path)!
-    os.write_file(remote_path, '[]')!
-  }
+	if !os.exists(remote_path) {
+		os.create(remote_path)!
+		os.write_file(remote_path, '[]')!
+	}
 
 	mut local := sqlite.connect(db_path)!
 
@@ -68,20 +68,20 @@ pub fn open() !DB {
 		create table File
 	}!
 
-  mut remote := json.decode([]JsonPackage, os.read_file(remote_path)!)!
+	mut remote := json.decode([]JsonPackage, os.read_file(remote_path)!)!
 
 	return DB{
-    local: local
-    remote: remote
-  }
+		local:  local
+		remote: remote
+	}
 }
 
 pub fn (mut db DB) register(info pkg.PkgInfo) ! {
 	p := Package{
-		name: info.name
+		name:    info.name
 		version: info.version
-		deps: json.encode(info.deps)
-		time: time.now()
+		deps:    json.encode(info.deps)
+		time:    time.now()
 	}
 
 	sql db.local {
@@ -96,10 +96,10 @@ pub fn (mut db DB) register(info pkg.PkgInfo) ! {
 	}!
 
 	for f in info.files {
-    file := File{
-      name: info.name
-      path: '/' + f
-    }
+		file := File{
+			name: info.name
+			path: '/' + f
+		}
 		sql db.local {
 			insert file into File
 		}!
@@ -116,9 +116,9 @@ pub fn (db &DB) get_local(name string) !pkg.PkgInfo {
 	}
 
 	mut info := pkg.PkgInfo{
-		name: rows[0].name
+		name:    rows[0].name
 		version: rows[0].version
-		deps: json.decode([]string, rows[0].deps) or { []string{} }
+		deps:    json.decode([]string, rows[0].deps) or { []string{} }
 	}
 
 	files := sql db.local {
@@ -133,22 +133,22 @@ pub fn (db &DB) get_local(name string) !pkg.PkgInfo {
 }
 
 pub fn (db &DB) get_remote(name string) !JsonPackage {
-  mut package := JsonPackage{}
-  mut found := false
+	mut package := JsonPackage{}
+	mut found := false
 
-  for pkg in db.remote {
-    if pkg.name == name {
-      package = pkg
-      found = true
-      break
-    }
-  }
+	for pkg in db.remote {
+		if pkg.name == name {
+			package = pkg
+			found = true
+			break
+		}
+	}
 
-  if !found {
-    return error('package not found')
-  }
+	if !found {
+		return error('package not found')
+	}
 
-  return package
+	return package
 }
 
 pub fn (db &DB) delete_local(name string) ! {
@@ -177,6 +177,6 @@ pub fn (db &DB) owner(path string) !string {
 }
 
 pub fn (db &DB) update_remote() ! {
-  remote := http.get('https://simpkg.frothy7650.org/api/packages')!.body
-  os.write_file(remote_path, remote)!
+	remote := http.get('https://simpkg.frothy7650.org/api/packages')!.body
+	os.write_file(remote_path, remote)!
 }

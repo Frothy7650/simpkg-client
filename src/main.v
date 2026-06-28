@@ -4,7 +4,7 @@ import os
 
 fn main() {
 	if os.getuid() != 0 && os.user_os() != 'windows' {
-    os.system('sudo ${os.args.join(' ')}')
+		os.system('sudo ${os.args.join(' ')}')
 		return
 	}
 
@@ -29,10 +29,10 @@ fn main() {
 
 	match cmd {
 		'install' { cmd_install(val) or { eprintln(err.msg()) } }
-		'remove'  { cmd_remove(val) }
-		'query'   { cmd_query(val) or { eprintln(err.msg()) } }
-		'owns'    { cmd_owns(val) or { eprintln(err.msg()) } }
-		else      { eprintln('unknown command') }
+		'remove' { cmd_remove(val) }
+		'query' { cmd_query(val) or { eprintln(err.msg()) } }
+		'owns' { cmd_owns(val) or { eprintln(err.msg()) } }
+		else { eprintln('unknown command') }
 	}
 }
 

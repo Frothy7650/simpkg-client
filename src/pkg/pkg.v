@@ -64,8 +64,12 @@ pub fn parse(root string) !PkgInfo {
 		val := parts[1]
 
 		match key {
-			'name' { pkg.name = val }
-			'version' { pkg.version = val }
+			'name' {
+				pkg.name = val
+			}
+			'version' {
+				pkg.version = val
+			}
 			'type' {
 				match val {
 					'binary' { pkg.type_ = .binary }
@@ -74,9 +78,15 @@ pub fn parse(root string) !PkgInfo {
 					else { return error('invalid type: ${val}') }
 				}
 			}
-			'depends' { pkg.deps << val }
-			'files' { pkg.files << val }
-			else { return error('unknown key: ${key}') }
+			'depends' {
+				pkg.deps << val
+			}
+			'files' {
+				pkg.files << val
+			}
+			else {
+				return error('unknown key: ${key}')
+			}
 		}
 	}
 
