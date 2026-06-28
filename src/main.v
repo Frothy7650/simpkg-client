@@ -24,6 +24,10 @@ fn main() {
       cmd_list() or { eprintln(err.msg()) }
       return
     }
+    'clear-cache' {
+      cmd_clear_cache() or { eprintln(err.msg()) }
+      return
+    }
     else {}
   }
 
@@ -36,15 +40,14 @@ fn main() {
 
 	match cmd {
 		'install' { cmd_install(val) or { eprintln(err.msg()) } }
-		'remove' { cmd_remove(val) }
+		'remove' { cmd_remove(val) or { eprintln(err.msg()) } }
 		'query' { cmd_query(val) or { eprintln(err.msg()) } }
 		'owns' { cmd_owns(val) or { eprintln(err.msg()) } }
-    'list' { cmd_list() or { eprintln(err.msg()) } }
     'search' { cmd_search(val) or { eprintln(err.msg()) } }
 		else { eprintln('unknown command') }
 	}
 }
 
 fn print_usage() {
-	eprintln('usage: simpkg <install|remove|query|owns|update> <target>')
+	eprintln('usage: simpkg {install|remove|query|owns|search|update|list|clear-cache} [target]')
 }

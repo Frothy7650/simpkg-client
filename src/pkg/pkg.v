@@ -16,6 +16,10 @@ pub mut:
 	type_   PkgType
 	deps    []string
 	files   []string
+  preinstalls  []string
+  postinstalls []string
+  preremoves   []string
+  postremoves  []string
 	root    string
 }
 
@@ -84,6 +88,18 @@ pub fn parse(root string) !PkgInfo {
 			'files' {
 				pkg.files << val
 			}
+      'preinstall' {
+        pkg.preinstalls << val
+      }
+      'postinstall' {
+        pkg.postinstalls << val
+      }
+      'preremove' {
+        pkg.preremoves << val
+      }
+      'postremove' {
+        pkg.postremoves << val
+      }
 			else {
 				return error('unknown key: ${key}')
 			}

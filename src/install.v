@@ -75,9 +75,25 @@ fn cmd_install(name string) ! {
 		}
 	}
 
+  if info.preinstalls.len > 0 { println('running preinstall hooks...') }
+  for cmd in info.preinstalls {
+    res := os.system(cmd)
+    if res != 0 {
+      return error('preinstall command failed with exit code ${res}: ${cmd}')
+    }
+  }
+
 	println('installing ${info.name} ${info.version}')
 
 	fs.install(info, &db, staging_dir)!
+
+  if info.postinstalls.len > 0 { println('running postinstall hooks...') }
+  for cmd in info.postinstalls {
+    res := os.system(cmd)
+    if res != 0 {
+      return error('postinstall command failed with exit code ${res}: ${cmd}')
+    }
+  }
 
 	db.register(info)!
 }
