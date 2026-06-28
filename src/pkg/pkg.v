@@ -23,7 +23,6 @@ pub mut:
 	root    string
 }
 
-// Extract .simpkg into a temp folder
 pub fn open(path string, out_dir string) !string {
 	if !os.exists(path) {
 		return error('package does not exist: ${path}')
@@ -40,7 +39,6 @@ pub fn open(path string, out_dir string) !string {
 	return out_dir
 }
 
-// Parse PKGINFO/metadata (NOW A FILE, NOT DIRECTORY)
 pub fn parse(root string) !PkgInfo {
 	pkginfo_path := os.join_path(root, 'PKGINFO')
 

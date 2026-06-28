@@ -1,4 +1,3 @@
-// install.v
 module main
 
 import net.http
