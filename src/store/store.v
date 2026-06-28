@@ -10,6 +10,8 @@ import os
 pub const db_path = os.join_path(store_dir(), 'local.db')
 pub const remote_path = os.join_path(store_dir(), 'remote.json')
 
+pub const remote_url = $if windows { 'https://simpkg.frothy7650.org/api/windows' } $else $if linux { 'https://simpkg.frothy7650.org/api/linux' }
+
 fn store_dir() string {
 	$if windows {
 		return os.join_path(os.state_dir(), 'simpkg')
@@ -177,6 +179,8 @@ pub fn (db &DB) owner(path string) !string {
 }
 
 pub fn (db &DB) update_remote() ! {
-	remote := http.get('https://simpkg.frothy7650.org/api/packages')!.body
+  println('fetching ${remote_url}')
+	remote := http.get(remote_url)!.body
 	os.write_file(remote_path, remote)!
+  println('done')
 }
