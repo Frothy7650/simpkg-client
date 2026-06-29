@@ -119,7 +119,7 @@ fn dep_exists(dep string) bool {
       }
     }
     // Try LoadLibrary (with null to free handle)
-    handle := C.LoadLibraryA(c'' + dll) // ensure C string
+    handle := C.LoadLibraryA(dll.str) // ensure C string
     if handle != 0 {
       C.FreeLibrary(handle)
       return true
