@@ -66,6 +66,27 @@ fn cmd_install(name string) ! {
 	// Verify dependencies.
 	fs.check_deps(info.deps)!
 
+  // Run build commands
+  if info.builds.len > 0 {
+    println('running build commands...')
+    mut p := get_system_shell()
+
+    p.work_folder = os.join_path(temp_dir(), 'extract')
+    p.set_redirect_stdio()
+    p.run()
+
+    for cmd in info.builds {
+      p.stdin_write(cmd + '\n')
+    }
+
+    p.stdin_write('exit\n')
+    p.wait()
+
+    if p.code != 0 {
+      return error('build failed with exit code ${p.code}')
+    }
+  }
+
 	for file in info.files {
 		owner := db.owner(file)!
 
@@ -95,4 +116,16 @@ fn cmd_install(name string) ! {
 	}
 
 	db.register(info)!
+}
+
+fn get_system_shell() &os.Process {
+  $if windows {
+    mut p := os.new_process('cmd.exe')
+    p.args = ['/k']
+    return p
+  } $else {
+    mut p := os.new_process('/bin/sh')
+    p.args = ['-s']
+    return p
+  }
 }

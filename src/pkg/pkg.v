@@ -10,7 +10,7 @@ pub mut:
 	version      string
 	deps         []string
 	files        []string
-  build        []string
+  builds        []string
 	preinstalls  []string
 	postinstalls []string
 	preremoves   []string
