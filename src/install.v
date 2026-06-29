@@ -68,7 +68,8 @@ fn cmd_install(name string) ! {
 
   // Run build commands
   if info.builds.len > 0 {
-    println('running build commands...')
+    println('running build commands, this may take a while...')
+    os.setenv('SIMPKG_ROOT', os.join_path(temp_dir(), 'extract'), true)
     mut p := get_system_shell()
 
     p.work_folder = os.join_path(temp_dir(), 'extract')
