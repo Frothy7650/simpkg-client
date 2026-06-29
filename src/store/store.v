@@ -33,7 +33,7 @@ pub struct Package {
 pub mut:
 	name        string @[primary; unique]
 	version     string
-	deps        string
+	depends     string
 	preremoves  string
 	postremoves string
 	time        time.Time
@@ -88,7 +88,7 @@ pub fn (mut db DB) register(info pkg.PkgInfo) ! {
 	p := Package{
 		name:        info.name
 		version:     info.version
-		deps:        json.encode(info.deps)
+		depends:        json.encode(info.depends)
 		preremoves:  json.encode(info.preremoves)
 		postremoves: json.encode(info.postremoves)
 		time:        time.now()
@@ -128,7 +128,7 @@ pub fn (db &DB) get_local(name string) !pkg.PkgInfo {
 	mut info := pkg.PkgInfo{
 		name:        rows[0].name
 		version:     rows[0].version
-		deps:        json.decode([]string, rows[0].deps) or { []string{} }
+		depends:        json.decode([]string, rows[0].depends) or { []string{} }
 		preremoves:  json.decode([]string, rows[0].preremoves) or { []string{} }
 		postremoves: json.decode([]string, rows[0].postremoves) or { []string{} }
 	}

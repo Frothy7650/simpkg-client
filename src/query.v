@@ -9,5 +9,5 @@ fn cmd_query(name string) ! {
 
 	println('name: ${info.name}')
 	println('version: ${info.version}')
-	println('deps: ${info.deps.join(', ')}')
+	println('depends: ${info.depends.join(', ')}')
 }

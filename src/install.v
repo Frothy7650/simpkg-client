@@ -64,7 +64,7 @@ fn cmd_install(name string) ! {
 	info := pkg.parse(root)!
 
 	// Verify dependencies.
-	fs.check_deps(info.deps)!
+	fs.check_deps(info.depends)!
 
   // Run build commands
   if info.builds.len > 0 {

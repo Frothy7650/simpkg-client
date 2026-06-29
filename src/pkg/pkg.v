@@ -8,9 +8,9 @@ pub struct PkgInfo {
 pub mut:
 	name         string
 	version      string
-	deps         []string
+	depends      []string
 	files        []string
-  builds        []string
+  builds       []string
 	preinstalls  []string
 	postinstalls []string
 	preremoves   []string
