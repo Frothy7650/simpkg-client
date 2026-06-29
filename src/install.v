@@ -138,7 +138,7 @@ fn cmd_install(name string) ! {
 
 fn get_system_shell() &os.Process {
   $if windows {
-    mut p := os.new_process('cmd.exe')
+    mut p := os.new_process('C:\\WINDOWS\\system32\\cmd.exe')
     p.args = ['/k']
     return p
   } $else {
