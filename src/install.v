@@ -81,6 +81,23 @@ fn cmd_install(name string) ! {
     }
 
     p.stdin_write('exit\n')
+
+    for {
+      out := p.stdout_read()
+      if out != '' {
+        print(out)
+      }
+
+      err := p.stderr_read()
+      if err != '' {
+        eprint(err)
+      }
+
+      if !p.is_alive() {
+        break
+      }
+    }
+
     p.wait()
 
     if p.code != 0 {

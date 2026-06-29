@@ -44,10 +44,11 @@ fn main() {
 		'query' { cmd_query(val) or { eprintln(err.msg()) } }
 		'owns' { cmd_owns(val) or { eprintln(err.msg()) } }
 		'search' { cmd_search(val) or { eprintln(err.msg()) } }
+    'files' { cmd_files(val) or { eprintln(err.msg()) } }
 		else { eprintln('unknown command') }
 	}
 }
 
 fn print_usage() {
-	eprintln('usage: simpkg {install|remove|query|owns|search|update|list|clear-cache} [target]')
+	eprintln('usage: simpkg {install|remove|query|owns|search|files|update|list|clear-cache} [target]')
 }
