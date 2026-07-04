@@ -10,7 +10,7 @@ pub mut:
 	version      string
 	depends      []string
 	files        []string
-  builds       []string
+	builds       []string
 	preinstalls  []string
 	postinstalls []string
 	preremoves   []string
@@ -44,14 +44,14 @@ pub fn parse(root string) !PkgInfo {
 	file := os.read_file(pkginfo_path)!
 
 	mut pkg := toml.decode[PkgInfo](file)!
-  pkg.root = root
+	pkg.root = root
 
 	if pkg.name == '' {
 		return error('missing package name')
 	}
-  if pkg.files.len == 0 {
-    return error('missing package file list')
-  }
+	if pkg.files.len == 0 {
+		return error('missing package file list')
+	}
 
 	return pkg
 }

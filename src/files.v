@@ -7,6 +7,5 @@ fn cmd_files(name string) ! {
 
 	info := db.get_local(name)!
 
-  println('files:\n${info.files.join_lines()}')
+	println('files:\n${info.files.join_lines()}')
 }
-

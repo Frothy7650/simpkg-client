@@ -24,7 +24,7 @@ fn main() {
 			cmd_list_local() or { eprintln(err.msg()) }
 			return
 		}
-    'list-remote' {
+		'list-remote' {
 			cmd_list_remote() or { eprintln(err.msg()) }
 			return
 		}
@@ -48,8 +48,8 @@ fn main() {
 		'query' { cmd_query(val) or { eprintln(err.msg()) } }
 		'owns' { cmd_owns(val) or { eprintln(err.msg()) } }
 		'search-local' { cmd_search_local(val) or { eprintln(err.msg()) } }
-    'search-remote' { cmd_search_remote(val) or { eprintln(err.msg()) } }
-    'files' { cmd_files(val) or { eprintln(err.msg()) } }
+		'search-remote' { cmd_search_remote(val) or { eprintln(err.msg()) } }
+		'files' { cmd_files(val) or { eprintln(err.msg()) } }
 		else { eprintln('unknown command') }
 	}
 }

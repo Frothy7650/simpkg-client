@@ -25,7 +25,7 @@ context.task(
 
 context.task(
   name: 'install'
-  depends: 'build'
+  depends: ['build']
   run:  |self| system('cp ${app_name} ${local_bin_dir() + path_separator}')
 )
 
