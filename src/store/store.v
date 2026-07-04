@@ -171,6 +171,12 @@ pub fn (db &DB) list_local() ![]Package {
 	return packages
 }
 
+pub fn (db &DB) list_remote() ![]JsonPackage {
+	packages := db.remote
+
+	return packages
+}
+
 pub fn (db &DB) delete_local(name string) ! {
 	sql db.local {
 		delete from Package where name == name

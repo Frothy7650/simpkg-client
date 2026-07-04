@@ -3,18 +3,18 @@ module main
 import strings
 import store
 
-fn cmd_search(name string) ! {
+fn cmd_search_remote(name string) ! {
 	mut db := store.open()!
 
 	if db.remote.len == 0 {
 		return
 	}
 
-	mut scored := []Scored{}
+	mut scored := []RemoteScored{}
 
 	for package in db.remote {
 		score := strings.levenshtein_distance(package.name.to_lower(), name.to_lower())
-		scored << Scored{
+		scored << RemoteScored{
 			package: package
 			score:   score
 		}
@@ -36,7 +36,7 @@ fn cmd_search(name string) ! {
 	}
 }
 
-struct Scored {
+struct RemoteScored {
 	package store.JsonPackage
 	score   int
 }

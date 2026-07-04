@@ -2,7 +2,7 @@ module main
 
 import store
 
-fn cmd_list() ! {
+fn cmd_list_local() ! {
 	mut db := store.open()!
 	packages := db.list_local()!
 
