@@ -25,7 +25,8 @@ context.task(
 
 context.task(
   name: 'install'
-  run:  |self| system('sudo cp -r ${app_name} /usr/bin/simpkg')
+  depends: 'build'
+  run:  |self| system('cp ${app_name} ${local_bin_dir() + path_separator}')
 )
 
 context.run()

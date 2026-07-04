@@ -55,5 +55,5 @@ fn main() {
 }
 
 fn print_usage() {
-	eprintln('usage: simpkg {install|remove|query|owns|search|files|update|list|clear-cache} [target]')
+	eprintln('usage: simpkg [install|remove|query|owns|search-local|search-remote|files|update|list-local|list-remote|clear-cache] <target>')
 }
