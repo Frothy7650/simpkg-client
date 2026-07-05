@@ -1,6 +1,10 @@
 # simpkg
 A simple package manager to install and remove packages.
 
+> [!WARNING]
+> The main repo for this is [here](https://iceshrimp.dev/frothy7650/simpkg-client.git), github is just a mirror
+
+
 ## Usage
 ```
 simpkg [flag] <target>
