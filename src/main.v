@@ -3,17 +3,36 @@ module main
 import os
 
 fn main() {
+	mut args := arguments()
 	if os.getuid() != 0 && os.user_os() != 'windows' {
-		os.system('sudo ${os.args.join(' ')}')
+		os.system('sudo ${args.join(' ')}')
 		return
 	}
 
-	if os.args.len < 2 {
+	if args.len < 2 {
 		print_usage()
 		return
 	}
 
-	cmd := os.args[1]
+	mut target_root := $if windows { 'C:\\' } $else { '/' }
+
+	for i := 0; i < args.len; i++ {
+		if args[i].starts_with('--root=') {
+			parts := args[i].split_nth('=', 2)
+
+			if parts.len != 2 || parts[0] == '' || parts[1] == '' {
+				eprintln('invalid flag ${args[i]}')
+				return
+			}
+
+			target_root = parts[1]
+			println('using specified root: ${target_root}')
+			args.delete(i)
+			break
+		}
+	}
+
+	cmd := args[1]
 
 	match cmd {
 		'update' {
@@ -35,22 +54,52 @@ fn main() {
 		else {}
 	}
 
-	if os.args.len < 3 {
+	if args.len < 3 {
 		print_usage()
 		return
 	}
 
-	val := os.args[2]
+	targets := args[2..].clone()
 
 	match cmd {
-		'install' { cmd_install(val) or { eprintln(err.msg()) } }
-		'remove' { cmd_remove(val) or { eprintln(err.msg()) } }
-		'query' { cmd_query(val) or { eprintln(err.msg()) } }
-		'owns' { cmd_owns(val) or { eprintln(err.msg()) } }
-		'search-local' { cmd_search_local(val) or { eprintln(err.msg()) } }
-		'search-remote' { cmd_search_remote(val) or { eprintln(err.msg()) } }
-		'files' { cmd_files(val) or { eprintln(err.msg()) } }
-		else { eprintln('unknown command') }
+		'install' {
+			for target in targets {
+				cmd_install(target, target_root) or { eprintln(err.msg()) }
+			}
+		}
+		'remove' {
+			for target in targets {
+				cmd_remove(target, target_root) or { eprintln(err.msg()) }
+			}
+		}
+		'query' {
+			for target in targets {
+				cmd_query(target) or { eprintln(err.msg()) }
+			}
+		}
+		'owns' {
+			for target in targets {
+				cmd_owns(target, target_root) or { eprintln(err.msg()) }
+			}
+		}
+		'search-local' {
+			for target in targets {
+				cmd_search_local(target) or { eprintln(err.msg()) }
+			}
+		}
+		'search-remote' {
+			for target in targets {
+				cmd_search_remote(target) or { eprintln(err.msg()) }
+			}
+		}
+		'files' {
+			for target in targets {
+				cmd_files(target) or { eprintln(err.msg()) }
+			}
+		}
+		else {
+			eprintln('unknown command')
+		}
 	}
 }
 

@@ -1,10 +1,9 @@
 module main
 
 import os
-import fs
 import store
 
-fn cmd_remove(name string) ! {
+fn cmd_remove(name string, target_root string) ! {
 	mut db := store.open() or {
 		eprintln(err.msg())
 		return
@@ -25,7 +24,7 @@ fn cmd_remove(name string) ! {
 
 	for f in info.files {
 		println('removing ${f}')
-		os.rm(os.join_path(fs.system_root(), f)) or { eprintln('failed: ${f}') }
+		os.rm(os.join_path(target_root, f)) or { eprintln('failed: ${f}') }
 	}
 
 	if info.postremoves.len > 0 { println('running postremove hooks...') }

@@ -51,7 +51,7 @@ fn fetch_package(package store.JsonPackage) !string {
 	return archive
 }
 
-fn cmd_install(name string) ! {
+fn cmd_install(name string, target_root string) ! {
 	mut db := store.open()!
 
 	remote := db.get_remote(name)!
@@ -123,7 +123,7 @@ fn cmd_install(name string) ! {
 
 	println('installing ${info.name} ${info.version}')
 
-	fs.install(info, &db, staging_dir)!
+	fs.install(info, &db, staging_dir, target_root)!
 
 	if info.postinstalls.len > 0 { println('running postinstall hooks...') }
 	for cmd in info.postinstalls {
