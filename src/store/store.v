@@ -144,6 +144,13 @@ pub fn (db &DB) get_local(name string) !pkg.PkgInfo {
 	return info
 }
 
+pub fn (db &DB) check_deps(deps []string) ! {
+  for dep in deps {
+    db.get_local(dep) or { return error('${dep} is not installed') }
+    println('dependency ${dep} is installed')
+  }
+}
+
 pub fn (db &DB) get_remote(name string) !JsonPackage {
 	mut package := JsonPackage{}
 	mut found := false
