@@ -3,8 +3,8 @@ module main
 import strings
 import store
 
-fn cmd_search_local(name string) ! {
-	mut db := store.open()!
+fn cmd_search_local(name string, target_root string) ! {
+	mut db := store.open(target_root)!
 
 	packages := db.list_local()!
 

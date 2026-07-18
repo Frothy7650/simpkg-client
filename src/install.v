@@ -6,23 +6,23 @@ import pkg
 import store
 import fs
 
-fn cache_dir() string {
+fn cache_dir(root string) string {
 	$if windows {
-		return os.join_path(os.cache_dir(), 'simpkg')
+		return os.join_path(root, os.cache_dir(), 'simpkg')
 	}
 
-	return '/var/cache/simpkg'
+	return os.join_path(root, '/var/cache/simpkg')
 }
 
-fn temp_dir() string {
-	return os.join_path(os.temp_dir(), 'simpkg')
+fn temp_dir(root string) string {
+	return os.join_path(root, os.temp_dir(), 'simpkg')
 }
 
-fn prepare_temp() !(string, string) {
-	root := temp_dir()
+fn prepare_temp(root string) !(string, string) {
+	base := temp_dir(root)
 
-	extract := os.join_path(root, 'extract')
-	stage := os.join_path(root, 'stage')
+	extract := os.join_path(base, 'extract')
+	stage := os.join_path(base, 'stage')
 
 	for dir in [extract, stage] {
 		if os.exists(dir) {
@@ -34,8 +34,8 @@ fn prepare_temp() !(string, string) {
 	return extract, stage
 }
 
-fn fetch_package(package store.RemotePackage) !string {
-	cache := cache_dir()
+fn fetch_package(package store.RemotePackage, root string) !string {
+	cache := cache_dir(root)
 
 	os.mkdir_all(cache)!
 
@@ -52,7 +52,7 @@ fn fetch_package(package store.RemotePackage) !string {
 // cmd_install resolves the full dependency chain for `name` via the DAG
 // and installs whatever isn't already present, in topological order.
 fn cmd_install(name string, target_root string) ! {
-	mut db := store.open()!
+	mut db := store.open(target_root)!
 
 	order := db.remote.install_order(name) or {
 		return error('failed to resolve dependencies for ${name}: ${err.msg()}')
@@ -84,9 +84,9 @@ fn cmd_install(name string, target_root string) ! {
 fn install_one(mut db store.DB, name string, target_root string) ! {
 	remote := db.get_remote(name)!
 
-	archive := fetch_package(remote)!
+	archive := fetch_package(remote, target_root)!
 
-	extract_dir, staging_dir := prepare_temp()!
+	extract_dir, staging_dir := prepare_temp(target_root)!
 
 	root := pkg.open(archive, extract_dir)!
 	info := pkg.parse(root)!

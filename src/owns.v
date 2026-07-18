@@ -3,7 +3,7 @@ module main
 import store
 
 fn cmd_owns(path string, system_root string) ! {
-	mut db := store.open()!
+	mut db := store.open(system_root)!
 
 	owner := db.owner(path.trim_left(system_root))!
 

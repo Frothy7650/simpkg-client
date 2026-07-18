@@ -3,8 +3,8 @@ module main
 import strings
 import store
 
-fn cmd_search_remote(name string) ! {
-	mut db := store.open()!
+fn cmd_search_remote(name string, target_root string) ! {
+	mut db := store.open(target_root)!
 
 	if db.remote.nodes.len == 0 {
 		return

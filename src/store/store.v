@@ -8,18 +8,24 @@ import frothy7650.dag
 import pkg
 import os
 
-pub const db_path = os.join_path(store_dir(), 'local.db')
-pub const remote_path = os.join_path(store_dir(), 'remote.json')
-
-fn store_dir() string {
+pub fn store_dir(root string) string {
 	$if windows {
-		return os.join_path(os.state_dir(), 'simpkg')
+		return os.join_path(root, os.state_dir(), 'simpkg')
 	}
-	return '/var/lib/simpkg'
+	return os.join_path(root, '/var/lib/simpkg')
+}
+
+pub fn db_path(root string) string {
+	return os.join_path(store_dir(root), 'local.db')
+}
+
+pub fn remote_path(root string) string {
+	return os.join_path(store_dir(root), 'remote.json')
 }
 
 pub struct DB {
 pub mut:
+	root   string
 	local  sqlite.DB
 	remote dag.Graph
 }
@@ -49,21 +55,29 @@ pub:
 	depends []string
 }
 
-pub fn open() !DB {
-	if !os.exists(store_dir()) {
-		os.mkdir_all(store_dir())!
+// open opens (creating if necessary) the local store rooted at `root`.
+// Pass '' (or '/') for the real system root; pass a directory to have the
+// store, its database, and the remote package cache live under that
+// directory instead — e.g. for `--root=/mnt/chroot` installs.
+pub fn open(root string) !DB {
+	dir := store_dir(root)
+	local_db_path := db_path(root)
+	local_remote_path := remote_path(root)
+
+	if !os.exists(dir) {
+		os.mkdir_all(dir)!
 	}
 
-	if !os.exists(db_path) {
-		os.create(db_path)!
+	if !os.exists(local_db_path) {
+		os.create(local_db_path)!
 	}
 
-	if !os.exists(remote_path) {
-		os.create(remote_path)!
-		os.write_file(remote_path, dag.new_graph().as_json())!
+	if !os.exists(local_remote_path) {
+		os.create(local_remote_path)!
+		os.write_file(local_remote_path, dag.new_graph().as_json())!
 	}
 
-	mut local := sqlite.connect(db_path)!
+	mut local := sqlite.connect(local_db_path)!
 
 	sql local {
 		create table Package
@@ -74,9 +88,10 @@ pub fn open() !DB {
 	}!
 
 	mut remote := dag.new_graph()
-	remote.from_json(os.read_file(remote_path)!)!
+	remote.from_json(os.read_file(local_remote_path)!)!
 
 	return DB{
+		root:   root
 		local:  local
 		remote: remote
 	}
@@ -227,7 +242,7 @@ pub fn (mut db DB) update_dag(dag_url string) ! {
 	mut g := dag.new_graph()
 	g.from_json(body)!
 
-	os.write_file(remote_path, body)!
+	os.write_file(remote_path(db.root), body)!
 	db.remote = g
 	println('done')
 }

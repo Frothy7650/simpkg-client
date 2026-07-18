@@ -34,23 +34,25 @@ fn main() {
 		}
 	}
 
+  ensure_paths(target_root)!
+
 	cmd := args[1]
 
 	match cmd {
 		'update' {
-			cmd_update() or { eprintln(err.msg()) }
+			cmd_update(target_root) or { eprintln(err.msg()) }
 			return
 		}
 		'list-local' {
-			cmd_list_local() or { eprintln(err.msg()) }
+			cmd_list_local(target_root) or { eprintln(err.msg()) }
 			return
 		}
 		'list-remote' {
-			cmd_list_remote() or { eprintln(err.msg()) }
+			cmd_list_remote(target_root) or { eprintln(err.msg()) }
 			return
 		}
 		'clear-cache' {
-			cmd_clear_cache() or { eprintln(err.msg()) }
+			cmd_clear_cache(target_root) or { eprintln(err.msg()) }
 			return
 		}
 		else {}
@@ -82,7 +84,7 @@ fn main() {
 		}
 		'query' {
 			for target in targets {
-				cmd_query(target) or { eprintln(err.msg()) }
+				cmd_query(target, target_root) or { eprintln(err.msg()) }
 			}
 		}
 		'owns' {
@@ -92,17 +94,17 @@ fn main() {
 		}
 		'search-local' {
 			for target in targets {
-				cmd_search_local(target) or { eprintln(err.msg()) }
+				cmd_search_local(target, target_root) or { eprintln(err.msg()) }
 			}
 		}
 		'search-remote' {
 			for target in targets {
-				cmd_search_remote(target) or { eprintln(err.msg()) }
+				cmd_search_remote(target, target_root) or { eprintln(err.msg()) }
 			}
 		}
 		'files' {
 			for target in targets {
-				cmd_files(target) or { eprintln(err.msg()) }
+				cmd_files(target, target_root) or { eprintln(err.msg()) }
 			}
 		}
 		else {

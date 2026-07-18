@@ -4,7 +4,7 @@ import os
 import store
 
 fn cmd_remove(name string, target_root string) ! {
-	mut db := store.open() or {
+	mut db := store.open(target_root) or {
 		eprintln(err.msg())
 		return
 	}
