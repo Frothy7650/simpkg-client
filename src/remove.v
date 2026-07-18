@@ -14,8 +14,8 @@ fn cmd_remove(name string, target_root string) ! {
 		return
 	}
 
-	if info.preremoves.len > 0 { println('running preremove hooks...') }
-	for cmd in info.preremoves {
+	if info.preremove.len > 0 { println('running preremove hooks...') }
+	for cmd in info.preremove {
 		res := os.system(cmd)
 		if res != 0 {
 			return error('preremove command failed with exit code ${res}: ${cmd}')
@@ -27,8 +27,8 @@ fn cmd_remove(name string, target_root string) ! {
 		os.rm(os.join_path(target_root, f)) or { eprintln('failed: ${f}') }
 	}
 
-	if info.postremoves.len > 0 { println('running postremove hooks...') }
-	for cmd in info.postremoves {
+	if info.postremove.len > 0 { println('running postremove hooks...') }
+	for cmd in info.postremove {
 		res := os.system(cmd)
 		if res != 0 {
 			return error('postremove command failed with exit code ${res}: ${cmd}')

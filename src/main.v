@@ -2,6 +2,8 @@ module main
 
 import os
 
+pub const config = Config.new()!
+
 fn main() {
 	mut args := arguments()
 	if os.getuid() != 0 && os.user_os() != 'windows' {
@@ -64,12 +66,18 @@ fn main() {
 	match cmd {
 		'install' {
 			for target in targets {
-				cmd_install(target, target_root) or { eprintln(err.msg()) }
+				cmd_install(target, target_root) or {
+          eprintln(err.msg())
+          eprintln('warning: continuing with other packages')
+        }
 			}
 		}
 		'remove' {
 			for target in targets {
-				cmd_remove(target, target_root) or { eprintln(err.msg()) }
+				cmd_remove(target, target_root) or {
+          eprintln(err.msg())
+          eprintln('warning: continuing with other packages')
+        }
 			}
 		}
 		'query' {

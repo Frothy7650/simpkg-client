@@ -6,16 +6,17 @@ import store
 fn cmd_search_remote(name string) ! {
 	mut db := store.open()!
 
-	if db.remote.len == 0 {
+	if db.remote.nodes.len == 0 {
 		return
 	}
 
 	mut scored := []RemoteScored{}
 
-	for package in db.remote {
-		score := strings.levenshtein_distance(package.name.to_lower(), name.to_lower())
+	for id, node in db.remote.nodes {
+		score := strings.levenshtein_distance(id.to_lower(), name.to_lower())
 		scored << RemoteScored{
-			package: package
+			name:    id
+			version: node.version
 			score:   score
 		}
 	}
@@ -31,12 +32,13 @@ fn cmd_search_remote(name string) ! {
 	end := if scored.len < 5 { scored.len } else { 5 }
 
 	for i in 0 .. end {
-		res := scored[i].package
+		res := scored[i]
 		println('${res.name} ${res.version}')
 	}
 }
 
 struct RemoteScored {
-	package store.JsonPackage
+	name    string
+	version string
 	score   int
 }

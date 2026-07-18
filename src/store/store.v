@@ -2,19 +2,14 @@ module store
 
 import db.sqlite
 import net.http
-import json
+import json2
 import time
+import frothy7650.dag
 import pkg
 import os
 
 pub const db_path = os.join_path(store_dir(), 'local.db')
 pub const remote_path = os.join_path(store_dir(), 'remote.json')
-
-pub const remote_url = $if windows {
-	'https://simpkg.frothy7650.org/api/windows'
-} $else $if linux {
-	'https://simpkg.frothy7650.org/api/linux'
-}
 
 fn store_dir() string {
 	$if windows {
@@ -26,17 +21,17 @@ fn store_dir() string {
 pub struct DB {
 pub mut:
 	local  sqlite.DB
-	remote []JsonPackage
+	remote dag.Graph
 }
 
 pub struct Package {
 pub mut:
-	name        string @[primary; unique]
-	version     string
-	depends     string
-	preremoves  string
-	postremoves string
-	time        time.Time
+	name       string @[primary; unique]
+	version    string
+	depends    string
+	preremove  string
+	postremove string
+	time       time.Time
 }
 
 pub struct File {
@@ -45,11 +40,13 @@ pub mut:
 	path string
 }
 
-pub struct JsonPackage {
-pub mut:
+// RemotePackage is a package entry resolved from the remote dependency graph.
+pub struct RemotePackage {
+pub:
 	name    string
 	version string
 	source  string
+	depends []string
 }
 
 pub fn open() !DB {
@@ -63,7 +60,7 @@ pub fn open() !DB {
 
 	if !os.exists(remote_path) {
 		os.create(remote_path)!
-		os.write_file(remote_path, '[]')!
+		os.write_file(remote_path, dag.new_graph().as_json())!
 	}
 
 	mut local := sqlite.connect(db_path)!
@@ -76,7 +73,8 @@ pub fn open() !DB {
 		create table File
 	}!
 
-	mut remote := json.decode([]JsonPackage, os.read_file(remote_path)!)!
+	mut remote := dag.new_graph()
+	remote.from_json(os.read_file(remote_path)!)!
 
 	return DB{
 		local:  local
@@ -86,12 +84,12 @@ pub fn open() !DB {
 
 pub fn (mut db DB) register(info pkg.PkgInfo) ! {
 	p := Package{
-		name:        info.name
-		version:     info.version
-		depends:     json.encode(info.depends)
-		preremoves:  json.encode(info.preremoves)
-		postremoves: json.encode(info.postremoves)
-		time:        time.now()
+		name:       info.name
+		version:    info.version
+		depends:    json2.encode(info.depends)
+		preremove:  json2.encode(info.preremove)
+		postremove: json2.encode(info.postremove)
+		time:       time.now()
 	}
 
 	sql db.local {
@@ -126,11 +124,11 @@ pub fn (db &DB) get_local(name string) !pkg.PkgInfo {
 	}
 
 	mut info := pkg.PkgInfo{
-		name:        rows[0].name
-		version:     rows[0].version
-		depends:     json.decode([]string, rows[0].depends) or { []string{} }
-		preremoves:  json.decode([]string, rows[0].preremoves) or { []string{} }
-		postremoves: json.decode([]string, rows[0].postremoves) or { []string{} }
+		name:       rows[0].name
+		version:    rows[0].version
+		depends:    json2.decode[[]string](rows[0].depends) or { []string{} }
+		preremove:  json2.decode[[]string](rows[0].preremove) or { []string{} }
+		postremove: json2.decode[[]string](rows[0].postremove) or { []string{} }
 	}
 
 	files := sql db.local {
@@ -144,30 +142,31 @@ pub fn (db &DB) get_local(name string) !pkg.PkgInfo {
 	return info
 }
 
-pub fn (db &DB) check_deps(deps []string) ! {
-  for dep in deps {
-    db.get_local(dep) or { return error('${dep} is not installed') }
-    println('dependency ${dep} is installed')
-  }
+// check_deps returns the subset of `deps` that are not yet installed locally.
+pub fn (db &DB) check_deps(deps []string) []string {
+	mut needed := []string{}
+
+	for dep in deps {
+		db.get_local(dep) or { needed << dep }
+	}
+
+	return needed
 }
 
-pub fn (db &DB) get_remote(name string) !JsonPackage {
-	mut package := JsonPackage{}
-	mut found := false
-
-	for pkg in db.remote {
-		if pkg.name == name {
-			package = pkg
-			found = true
-			break
-		}
+// get_remote looks up a package directly in the remote dependency graph.
+pub fn (db &DB) get_remote(name string) !RemotePackage {
+	if name !in db.remote.nodes {
+		return error('remote package not found: ${name}')
 	}
 
-	if !found {
-		return error('package not found')
-	}
+	node := db.remote.nodes[name]
 
-	return package
+	return RemotePackage{
+		name:    node.id
+		version: node.version
+		source:  node.source
+		depends: db.remote.immediate_deps(name)
+	}
 }
 
 pub fn (db &DB) list_local() ![]Package {
@@ -178,8 +177,18 @@ pub fn (db &DB) list_local() ![]Package {
 	return packages
 }
 
-pub fn (db &DB) list_remote() ![]JsonPackage {
-	packages := db.remote
+// list_remote returns every package known to the remote dependency graph.
+pub fn (db &DB) list_remote() []RemotePackage {
+	mut packages := []RemotePackage{}
+
+	for id, node in db.remote.nodes {
+		packages << RemotePackage{
+			name:    id
+			version: node.version
+			source:  node.source
+			depends: db.remote.edges[id]
+		}
+	}
 
 	return packages
 }
@@ -209,9 +218,16 @@ pub fn (db &DB) owner(path string) !string {
 	return files[0].name
 }
 
-pub fn (db &DB) update_remote() ! {
-	println('fetching ${remote_url}')
-	remote := http.get(remote_url)!.body
-	os.write_file(remote_path, remote)!
+// update_dag fetches the latest dependency graph — which now doubles as the
+// remote package list (name, version, source, and deps) — and persists it.
+pub fn (mut db DB) update_dag(dag_url string) ! {
+	println('fetching ${dag_url}')
+	body := http.get(dag_url)!.body
+
+	mut g := dag.new_graph()
+	g.from_json(body)!
+
+	os.write_file(remote_path, body)!
+	db.remote = g
 	println('done')
 }

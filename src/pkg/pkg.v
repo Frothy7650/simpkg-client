@@ -6,16 +6,17 @@ import os
 
 pub struct PkgInfo {
 pub mut:
-	name         string
-	version      string
-	depends      []string
-	files        []string
-	builds       []string
-	preinstalls  []string
-	postinstalls []string
-	preremoves   []string
-	postremoves  []string
-	root         string
+	name        string
+	version     string
+	depends     []string
+	files       []string
+	prepare     []string
+	build       []string
+	preinstall  []string
+	postinstall []string
+	preremove   []string
+	postremove  []string
+	root        string
 }
 
 pub fn open(path string, out_dir string) !string {

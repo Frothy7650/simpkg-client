@@ -14,7 +14,6 @@ fn cache_dir() string {
 	return '/var/cache/simpkg'
 }
 
-// Returns the temporary working directory.
 fn temp_dir() string {
 	return os.join_path(os.temp_dir(), 'simpkg')
 }
@@ -29,14 +28,13 @@ fn prepare_temp() !(string, string) {
 		if os.exists(dir) {
 			os.rmdir_all(dir)!
 		}
-
 		os.mkdir_all(dir)!
 	}
 
 	return extract, stage
 }
 
-fn fetch_package(package store.JsonPackage) !string {
+fn fetch_package(package store.RemotePackage) !string {
 	cache := cache_dir()
 
 	os.mkdir_all(cache)!
@@ -51,9 +49,39 @@ fn fetch_package(package store.JsonPackage) !string {
 	return archive
 }
 
+// cmd_install resolves the full dependency chain for `name` via the DAG
+// and installs whatever isn't already present, in topological order.
 fn cmd_install(name string, target_root string) ! {
 	mut db := store.open()!
 
+	order := db.remote.install_order(name) or {
+		return error('failed to resolve dependencies for ${name}: ${err.msg()}')
+	}
+
+	mut to_install := []string{}
+	for id in order {
+		if id == name {
+			to_install << id
+			continue
+		}
+		db.get_local(id) or { to_install << id }
+	}
+
+	if to_install.len > 1 {
+		println('installing dependencies:')
+		for id in to_install {
+			if id != name {
+				println('\t${id}')
+			}
+		}
+	}
+
+	for pkg_name in to_install {
+		install_one(mut db, pkg_name, target_root)!
+	}
+}
+
+fn install_one(mut db store.DB, name string, target_root string) ! {
 	remote := db.get_remote(name)!
 
 	archive := fetch_package(remote)!
@@ -63,23 +91,18 @@ fn cmd_install(name string, target_root string) ! {
 	root := pkg.open(archive, extract_dir)!
 	info := pkg.parse(root)!
 
-	// Verify dependencies.
-	db.check_deps(info.depends)!
-
-	// Run build commands
-	if info.builds.len > 0 {
+	if info.build.len > 0 {
 		println('running build commands, this may take a while...')
-		os.setenv('SIMPKG_ROOT', os.join_path(temp_dir(), 'extract'), true)
+		os.setenv('SIMPKG_ROOT', extract_dir, true)
 		mut p := get_system_shell()
 
-		p.work_folder = os.join_path(temp_dir(), 'extract')
+		p.work_folder = extract_dir
 		p.set_redirect_stdio()
 		p.run()
 
-		for cmd in info.builds {
+		for cmd in info.build {
 			p.stdin_write(cmd + '\n')
 		}
-
 		p.stdin_write('exit\n')
 
 		for {
@@ -113,8 +136,8 @@ fn cmd_install(name string, target_root string) ! {
 		}
 	}
 
-	if info.preinstalls.len > 0 { println('running preinstall hooks...') }
-	for cmd in info.preinstalls {
+	if info.preinstall.len > 0 { println('running preinstall hooks...') }
+	for cmd in info.preinstall {
 		res := os.system(cmd)
 		if res != 0 {
 			return error('preinstall command failed with exit code ${res}: ${cmd}')
@@ -125,8 +148,8 @@ fn cmd_install(name string, target_root string) ! {
 
 	fs.install(info, &db, staging_dir, target_root)!
 
-	if info.postinstalls.len > 0 { println('running postinstall hooks...') }
-	for cmd in info.postinstalls {
+	if info.postinstall.len > 0 { println('running postinstall hooks...') }
+	for cmd in info.postinstall {
 		res := os.system(cmd)
 		if res != 0 {
 			return error('postinstall command failed with exit code ${res}: ${cmd}')
