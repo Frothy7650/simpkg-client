@@ -10,6 +10,7 @@ pub mut:
 	version     string
 	depends     []string
 	files       []string
+  symlinks    map[string]string
 	prepare     []string
 	build       []string
 	preinstall  []string

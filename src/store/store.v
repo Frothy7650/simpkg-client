@@ -127,6 +127,16 @@ pub fn (mut db DB) register(info pkg.PkgInfo) ! {
 			insert file into File
 		}!
 	}
+
+  for link, _ in info.symlinks {
+    file := File{
+      name: info.name
+      path: link
+    }
+    sql db.local {
+      insert file into File
+    }!
+  }
 }
 
 pub fn (db &DB) get_local(name string) !pkg.PkgInfo {
