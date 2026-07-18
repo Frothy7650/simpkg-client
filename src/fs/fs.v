@@ -20,25 +20,40 @@ pub fn install(info pkg.PkgInfo, db &store.DB, staging string, target_root strin
 			return error('file owned by ${owner}: ${file}')
 		}
 
-		// ensure dir exists
-		dir := os.dir(dst)
-		if !os.exists(dir) {
-			os.mkdir_all(dir)!
-		}
+		if os.is_dir(src) {
+      // Preserve empty directories.
+      if !os.exists(dst) {
+        os.mkdir_all(dst)!
+      }
+      continue
+    }
 
-		os.cp(src, dst)!
+    // Ensure parent directory exists.
+    dir := os.dir(dst)
+    if !os.exists(dir) {
+      os.mkdir_all(dir)!
+    }
+
+    os.cp(src, dst)!
 	}
 
 	for file in info.files {
 		src := os.join_path(staging, file)
 		dst := os.join_path(target_root, file)
 
-		dir := os.dir(dst)
-		if !os.exists(dir) {
-			os.mkdir_all(dir)!
-		}
+		if os.is_dir(src) {
+      if !os.exists(dst) {
+        os.mkdir_all(dst)!
+      }
+      continue
+    }
 
-		println('installing ${src} to ${dst}')
-		os.cp(src, dst)!
+    dir := os.dir(dst)
+    if !os.exists(dir) {
+      os.mkdir_all(dir)!
+    }
+
+    println('installing ${src} to ${dst}')
+    os.cp(src, dst)!
 	}
 }
