@@ -67,17 +67,17 @@ fn main() {
 		'install' {
 			for target in targets {
 				cmd_install(target, target_root) or {
-          eprintln(err.msg())
-          eprintln('warning: continuing with other packages')
-        }
+					eprintln(err.msg())
+					eprintln('warning: continuing with other packages')
+				}
 			}
 		}
 		'remove' {
 			for target in targets {
 				cmd_remove(target, target_root) or {
-          eprintln(err.msg())
-          eprintln('warning: continuing with other packages')
-        }
+					eprintln(err.msg())
+					eprintln('warning: continuing with other packages')
+				}
 			}
 		}
 		'query' {
